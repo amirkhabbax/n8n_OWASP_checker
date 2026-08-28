@@ -1,0 +1,85 @@
+{
+  "name": "OWASP Checker – Minimal",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "owasp-check",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        0
+      ],
+      "id": "d7c33b3c-732b-4bd3-994b-1930903fa602",
+      "name": "Webhook",
+      "webhookId": "853d8df0-d13c-47df-89ad-61e21ce83f50"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $input.all() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -112,
+        -48
+      ],
+      "id": "6e72648f-d0d5-4926-b01c-980ea3f974fc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8080/api/posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -272,
+        -16
+      ],
+      "id": "7e8f4d83-a4de-42dd-a9c3-7a57279787b6",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e5d97b13-986a-4713-aa52-77340b3cb64a",
+  "nodeGroups": [],
+  "id": "sQNmZGtqrAAq2Smo",
+  "tags": []
+}
