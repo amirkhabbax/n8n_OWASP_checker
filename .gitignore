@@ -1,0 +1,93 @@
+# ==========================================
+# Angular / Node
+# ==========================================
+
+frontend/node_modules/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/bazel-out/
+frontend/.angular/cache/
+frontend/.sass-cache/
+frontend/coverage/
+
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# ==========================================
+# Java / Maven
+# ==========================================
+
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Build output accidentally created elsewhere
+**/target/
+**/build/
+
+
+# ==========================================
+# Application data
+# ==========================================
+
+# Local SQLite database
+backend/data/*.db
+backend/data/*.db-*
+backend/data/*.sqlite
+backend/data/*.sqlite-*
+
+
+# ==========================================
+# IDEs / Editors
+# ==========================================
+
+.idea/
+*.iws
+*.iml
+*.ipr
+
+.project
+.classpath
+.c9/
+*.launch
+*.sublime-workspace
+.settings/
+
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+
+.nb-gradle/
+nbproject/private/
+nbbuild/
+nbdist/
+
+
+# ==========================================
+# VS Code
+# ==========================================
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.history/
+
+
+# ==========================================
+# Miscellaneous
+# ==========================================
+
+.DS_Store
+Thumbs.db
+
+/connect.lock
+/typings
+/libpeerconnection.log
+testem.log
+/sass-cache/

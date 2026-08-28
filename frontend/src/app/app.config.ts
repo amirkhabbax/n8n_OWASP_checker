@@ -1,0 +1,16 @@
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+
+import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { baseUrlInterceptor } from '../core/interceptor/baseUrl.interceptor';
+import { provideBaseUrl } from '../core/injectionTokens/baseUrl.injectionToken';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([baseUrlInterceptor])),
+    provideBaseUrl('http://localhost:8080')
+  ],
+};
