@@ -1,0 +1,287 @@
+{
+  "name": "OWASP_Checker_REAL",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const changes = $input.first().json.changes ?? [];\n\nreturn changes.map(change => ({\n  json: {\n    file: change.new_path,\n    diff: change.diff\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        -224
+      ],
+      "id": "81d9a381-6d39-4312-a378-93211da9c31a",
+      "name": "normalization of changes"
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:8929/api/v4/projects/{{ $json.body.project.id }}/merge_requests/{{ $json.body.object_attributes.iid }}/changes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "PRIVATE-TOKEN",
+              "value": "glpat-5-cnH_k6lA2vVByzCjmAnm86MQp1OjEH.01.0w1plupf1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -752,
+        -224
+      ],
+      "id": "f6dc462d-c714-4e78-8fa7-922c86fe01af",
+      "name": "fetch Merge Request changes"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gitlab-mr",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -976,
+        -224
+      ],
+      "id": "6211c6a3-b1d6-4eb9-ac16-1b4e54b7133c",
+      "name": "a Merge Request modified",
+      "webhookId": "eb6df7d0-5b3d-41dd-802e-8bcfd2beac6f"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const suspiciousPatterns = [\n  {\n    pattern: /innerHTML/i,\n    reason: 'Direct assignment to innerHTML can introduce XSS.'\n  },\n  {\n    pattern: /outerHTML/i,\n    reason: 'Direct assignment to outerHTML can introduce XSS.'\n  },\n  {\n    pattern: /document\\.write\\s*\\(/i,\n    reason: 'document.write() can inject attacker-controlled HTML.'\n  },\n  {\n    pattern: /bypassSecurityTrustHtml\\s*\\(/i,\n    reason: 'Bypassing Angular HTML sanitization can introduce XSS.'\n  }\n];\n\nconst diff = $json.diff ?? '';\n\nconst addedLines = diff\n  .split('\\n')\n  .filter(line => line.startsWith('+') && !line.startsWith('+++'))\n  .map(line => line.slice(1));\n\n\nconst findings = [];\n\nfor (const line of addedLines) {\n  for (const rule of suspiciousPatterns) {\n    if (rule.pattern.test(line)) {\n      findings.push({\n        line,\n        reason: rule.reason\n      });\n    }\n  }\n}\n\nreturn {\n  json: {\n    file: $json.file,\n    findings,\n    suspicious: findings.length > 0\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -224
+      ],
+      "id": "aa16b21c-e879-40e3-9101-05140111e914",
+      "name": "detect suspicious changes"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8e68e194-0f84-4b3e-b001-8167bc4e506b",
+              "leftValue": "={{ $json.suspicious }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        -224
+      ],
+      "id": "3c503765-e901-44e8-b7cf-647fa26f77b8",
+      "name": "extract only suspicious changes"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        224,
+        16
+      ],
+      "id": "d4971b38-aeee-4c38-b31b-e09ec0e3d4f8",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "Y4vtacrHaKeb5u0r",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a security code review agent.\n\nAnalyze the following security candidate detected in a GitLab Merge Request.\n\nFile:\n{{ $json.file }}\n\nDetected findings:\n{{ JSON.stringify($json.findings) }}\n\nDetermine whether the finding represents a genuine security vulnerability.\n\nIf it is a vulnerability:\n- identify the vulnerability type\n- assess severity\n- explain why it is dangerous\n- provide a practical remediation\n\nIf it is not a vulnerability, explain why it is a false positive.\n\nBe concise and focus only on the supplied code finding.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        144,
+        -224
+      ],
+      "id": "d408b95b-9815-48b1-bc45-556a52ac84b6",
+      "name": "AI Agent analyzes the suspicious code and proposes some remedies"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { analysis: $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        496,
+        -224
+      ],
+      "id": "9837fe95-4b0e-43d7-87fe-75b57d87002c",
+      "name": "responde to the trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:8929/api/v4/projects/{{ $('a Merge Request modified').item.json.body.project.id }}/merge_requests/{{ $('a Merge Request modified').item.json.body.object_attributes.iid }}/notes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "PRIVATE-TOKEN",
+              "value": "glpat-5-cnH_k6lA2vVByzCjmAnm86MQp1OjEH.01.0w1plupf1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"body\" : \"{{$json.output}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        720,
+        -224
+      ],
+      "id": "6ca9851e-119e-4280-9958-c94e84f4f8c5",
+      "name": "comment the analysis result "
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "fetch Merge Request changes": {
+      "main": [
+        [
+          {
+            "node": "normalization of changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "a Merge Request modified": {
+      "main": [
+        [
+          {
+            "node": "fetch Merge Request changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalization of changes": {
+      "main": [
+        [
+          {
+            "node": "detect suspicious changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "detect suspicious changes": {
+      "main": [
+        [
+          {
+            "node": "extract only suspicious changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract only suspicious changes": {
+      "main": [
+        [
+          {
+            "node": "AI Agent analyzes the suspicious code and proposes some remedies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent analyzes the suspicious code and proposes some remedies",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent analyzes the suspicious code and proposes some remedies": {
+      "main": [
+        [
+          {
+            "node": "responde to the trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "responde to the trigger": {
+      "main": [
+        [
+          {
+            "node": "comment the analysis result ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2b88d803-375d-4c74-861a-6e6d92a33318",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "abb8000ec0954a1873ea9f726916bd81b7e513bf70f64ea5468882434c65fb2d"
+  },
+  "nodeGroups": [],
+  "id": "v4J8uvFmU4fBGree",
+  "tags": []
+}
