@@ -9,11 +9,4 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'frontend';
-
-//   constructor(){
-//         // INTENTIONALLY VULNERABLE — for security detector testing only.
-//     const userInput = 'test';
-//     const element = document.createElement('div');
-//     element.outerHTML = userInput;
-//   }
 }
