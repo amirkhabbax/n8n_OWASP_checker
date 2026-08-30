@@ -17,10 +17,10 @@ export class HomeComponent implements OnInit {
         this.fetchedPosts.set(res);
       }
     });
-    
-    // INTENTIONALLY VULNERABLE — for security detector testing only.
-    const userInput = 'test';
-    const element = document.createElement('div');
-    element.innerHTML = userInput;
+
+    // // INTENTIONALLY VULNERABLE — for security detector testing only.
+    // const userInput = 'test';
+    // const element = document.createElement('div');
+    // element.innerHTML = userInput;
   }
 }
