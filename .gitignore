@@ -91,3 +91,5 @@ Thumbs.db
 /libpeerconnection.log
 testem.log
 /sass-cache/
+.env
+/gitlab/

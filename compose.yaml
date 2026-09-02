@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "8080:8080"
+      - "8500:8080"
     volumes:
       - sqlite-data:/app/data
 
@@ -11,16 +11,34 @@ services:
     build:
       context: ./frontend
     ports:
-      - "4200:80"
+      - "4400:80"
     depends_on:
       - backend
 
   n8n:
     image: docker.n8n.io/n8nio/n8n
     ports:
-      - "5678:5678"
+      - "6200:5678"
     volumes:
       - n8n-data:/home/node/.n8n
+    depends_on:
+      - gitlab
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost:8929'
+        gitlab_rails['gitlab_shell_ssh_port'] = 22222
+    ports:
+      - "8929:8929"
+      - "22222:22"
+    volumes:
+      - ${GITLAB_DATA_PATH}/config:/etc/gitlab
+      - ${GITLAB_DATA_PATH}/logs:/var/log/gitlab
+      - ${GITLAB_DATA_PATH}/data:/var/opt/gitlab
+    shm_size: "256m"
 
 volumes:
   sqlite-data:
