@@ -39,7 +39,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "1ed785b7-7604-4675-9618-e71698e1615d",
+        "path": "gitlab-mr",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -266,18 +266,18 @@
           "headers": {
             "content-type": "application/json",
             "user-agent": "GitLab/19.3.1",
-            "idempotency-key": "9009172e-51b5-41a3-a0e4-9d729641669d",
+            "idempotency-key": "d911a49a-919b-4879-b9ff-d2713b940447",
             "x-gitlab-event": "Merge Request Hook",
-            "x-gitlab-webhook-uuid": "29bd1a99-8535-4bda-82ce-8aa9691b1dbc",
+            "x-gitlab-webhook-uuid": "3cd40a97-9127-451c-adfd-642f659deea5",
             "x-gitlab-instance": "http://localhost:8929",
-            "webhook-timestamp": "1788115771",
-            "webhook-id": "9009172e-51b5-41a3-a0e4-9d729641669d",
-            "x-gitlab-event-uuid": "975f7e30-f345-49d3-853d-45471b652336",
+            "webhook-timestamp": "1788435239",
+            "webhook-id": "d911a49a-919b-4879-b9ff-d2713b940447",
+            "x-gitlab-event-uuid": "be797db3-f376-4d2e-b072-680f9652b006",
             "accept-encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
             "accept": "*/*",
             "connection": "close",
-            "host": "host.docker.internal:5678",
-            "content-length": "4788"
+            "host": "host.docker.internal:6200",
+            "content-length": "4742"
           },
           "params": {},
           "query": {},
@@ -337,7 +337,7 @@
               "target_project_id": 1,
               "time_estimate": 0,
               "title": "changes to front host port and changes to CORS settings to work eith the altered change",
-              "updated_at": "2026-08-30T18:49:31.271Z",
+              "updated_at": "2026-09-03T11:33:59.550Z",
               "updated_by_id": null,
               "prepared_at": "2026-08-30T10:09:09.289Z",
               "assignee_ids": [
@@ -351,11 +351,11 @@
               "human_total_time_spent": null,
               "labels": [],
               "last_commit": {
-                "id": "5614ba99198d366a809c30745f8cb7e36fd7ea18",
-                "message": "added vulnerabilities to test the ai agent\n",
-                "title": "added vulnerabilities to test the ai agent",
-                "timestamp": "2026-08-30T22:19:25+03:30",
-                "url": "http://localhost:8929/fullstack/n8n_owasp_checker/-/commit/5614ba99198d366a809c30745f8cb7e36fd7ea18",
+                "id": "c7eae1b024b67ed258540affa98a8f71be142f06",
+                "message": "revoke another test\n",
+                "title": "revoke another test",
+                "timestamp": "2026-09-03T15:03:55+03:30",
+                "url": "http://localhost:8929/fullstack/n8n_owasp_checker/-/commit/c7eae1b024b67ed258540affa98a8f71be142f06",
                 "author": {
                   "name": "Amirhossein",
                   "email": "amir.khabbaz@gmail.com"
@@ -409,8 +409,8 @@
               "url": "http://localhost:8929/fullstack/n8n_owasp_checker/-/merge_requests/1",
               "work_in_progress": false,
               "action": "update",
-              "actioned_at": "2026-08-30T18:49:31.478Z",
-              "oldrev": "61cc975f38c6b0c339b1ff4a78fcc4895396038b"
+              "actioned_at": "2026-09-03T11:33:59.736Z",
+              "oldrev": "4cbadebf6811e8a9462e409c4e1168dd74f58bfb"
             },
             "labels": [],
             "changes": {},
@@ -601,7 +601,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "e0ec9d36-6f57-487d-af6c-249171e831d6",
+  "versionId": "fa418371-aaa7-4e6b-97b9-7ec061449a71",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "abb8000ec0954a1873ea9f726916bd81b7e513bf70f64ea5468882434c65fb2d"
