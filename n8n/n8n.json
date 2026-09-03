@@ -1,5 +1,5 @@
 {
-  "name": "OWASP_Checker_REAL",
+  "name": "OWASP_Checker_onlyGAPgpt",
   "nodes": [
     {
       "parameters": {
@@ -9,9 +9,9 @@
       "typeVersion": 2,
       "position": [
         -512,
-        -96
+        576
       ],
-      "id": "81d9a381-6d39-4312-a378-93211da9c31a",
+      "id": "c015255e-3050-4ddc-a7a7-760756447ea8",
       "name": "normalization of changes"
     },
     {
@@ -25,9 +25,9 @@
       "typeVersion": 4.5,
       "position": [
         -736,
-        -96
+        576
       ],
-      "id": "f6dc462d-c714-4e78-8fa7-922c86fe01af",
+      "id": "1ee3f8e9-b689-4105-b58d-04b8e7830664",
       "name": "fetch Merge Request changes",
       "credentials": {
         "gitlabApi": {
@@ -39,7 +39,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "gitlab-mr",
+        "path": "1ed785b7-7604-4675-9618-e71698e1615d",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -47,60 +47,11 @@
       "typeVersion": 2.1,
       "position": [
         -960,
-        -96
+        576
       ],
-      "id": "6211c6a3-b1d6-4eb9-ac16-1b4e54b7133c",
+      "id": "c33ad007-cd65-4be0-b2ef-eb0209395596",
       "name": "a Merge Request modified",
-      "webhookId": "eb6df7d0-5b3d-41dd-802e-8bcfd2beac6f"
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const suspiciousPatterns = [\n  {\n    pattern: /innerHTML/i,\n    reason: 'Direct assignment to innerHTML can introduce XSS.'\n  },\n  {\n    pattern: /outerHTML/i,\n    reason: 'Direct assignment to outerHTML can introduce XSS.'\n  },\n  {\n    pattern: /document\\.write\\s*\\(/i,\n    reason: 'document.write() can inject attacker-controlled HTML.'\n  },\n  {\n    pattern: /bypassSecurityTrustHtml\\s*\\(/i,\n    reason: 'Bypassing Angular HTML sanitization can introduce XSS.'\n  }\n];\n\nconst diff = $json.diff ?? '';\nconst file = $json.file;\n\n// The n8n workflow contains the detector's own security patterns.\n// Do not analyze the workflow definition itself.\nif (file.endsWith('n8n.json')) {\n  return {\n    json: {\n      file,\n      findings: [],\n      suspicious: false\n    }\n  };\n}\n\nconst lines = diff.split('\\n');\n\nlet newLineNumber = 0;\nconst findings = [];\n\nfor (const line of lines) {\n\n  // Parse diff hunk header, e.g.:\n  // @@ -10,5 +20,7 @@\n  const hunkMatch = line.match(/^@@ -\\d+(?:,\\d+)? \\+(\\d+)(?:,\\d+)? @@/);\n\n  if (hunkMatch) {\n    newLineNumber = Number(hunkMatch[1]);\n    continue;\n  }\n\n  // Skip file headers\n  if (line.startsWith('+++')) {\n    continue;\n  }\n\n  // Added line\n  if (line.startsWith('+')) {\n    const code = line.slice(1);\n\n    for (const rule of suspiciousPatterns) {\n      if (rule.pattern.test(code)) {\n        findings.push({\n          line: newLineNumber,\n          code,\n          reason: rule.reason\n        });\n      }\n    }\n\n    newLineNumber++;\n    continue;\n  }\n\n  // Deleted line: exists only in old version\n  if (line.startsWith('-')) {\n    continue;\n  }\n\n  // Context line: exists in both versions\n  if (line.startsWith(' ') || line === '') {\n    newLineNumber++;\n  }\n}\n\nreturn {\n  json: {\n    file,\n    findings,\n    suspicious: findings.length > 0\n  }\n};"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -960,
-        -576
-      ],
-      "id": "aa16b21c-e879-40e3-9101-05140111e914",
-      "name": "detect suspicious changes"
-    },
-    {
-      "parameters": {
-        "model": "gemma4:latest",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        592,
-        -128
-      ],
-      "id": "d4971b38-aeee-4c38-b31b-e09ec0e3d4f8",
-      "name": "Ollama Chat Model",
-      "credentials": {
-        "ollamaApi": {
-          "id": "Y4vtacrHaKeb5u0r",
-          "name": "Ollama account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=You are a security code review agent analyzing suspicious changes detected in a GitLab Merge Request.\n\nThe detection stage has already identified potentially dangerous code patterns and calculated their exact file and new-file line numbers.\n\nAnalyze ALL supplied findings and determine which ones represent genuine security vulnerabilities.\n\nFindings:\n{{ JSON.stringify($json.findings, null, 2) }}\n\nFor every genuine vulnerability, include:\n\n- File\n- Line\n- Vulnerability type\n- Severity\n- Explanation of why it is dangerous\n- Practical remediation\n\nThe File and Line must come directly from the supplied finding data. Do not invent or guess locations.\n\nIf a finding is a false positive, identify it as a false positive and briefly explain why.\n\nIf multiple findings represent the same underlying vulnerability, you may group them together, but include all relevant file and line locations.\n\nBe concise and focus only on the supplied findings.",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        512,
-        -352
-      ],
-      "id": "d408b95b-9815-48b1-bc45-556a52ac84b6",
-      "name": "AI Agent analyzes the suspicious code and proposes some remedies"
+      "webhookId": "1ed785b7-7604-4675-9618-e71698e1615d"
     },
     {
       "parameters": {
@@ -111,10 +62,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        864,
-        -96
+        1280,
+        576
       ],
-      "id": "9837fe95-4b0e-43d7-87fe-75b57d87002c",
+      "id": "196eedca-3d6e-470e-aa3f-76b44727746d",
       "name": "responde to the trigger"
     },
     {
@@ -128,7 +79,7 @@
           "parameters": [
             {
               "name": "body",
-              "value": "={{ $json.output }}"
+              "value": "={{\n(() => {\n  let result;\n\n  try {\n    result = JSON.parse($json.output || '{\"findings\":[]}');\n  } catch {\n    return '## 🔐 Security Analysis\\n\\nUnable to parse the analyzer response.';\n  }\n\n  const findings = Array.isArray(result.findings) ? result.findings : [];\n  const confirmed = findings.filter(f => f.isFalsePositive === false);\n  const unconfirmed = findings.filter(f => f.isFalsePositive === true);\n\n  let md = '## 🔐 Security Analysis\\n\\n';\n\n  if (confirmed.length === 0) {\n    md += '### ✅ No confirmed vulnerabilities\\n\\n';\n    md += 'The security analyzer did not confirm any genuine security vulnerabilities in the detected changes.\\n';\n  } else {\n    md += `### 🚨 Confirmed vulnerabilities (${confirmed.length})\\n\\n`;\n\n    confirmed.forEach((f, i) => {\n      md += `#### ${i + 1}. ${f.vulnerabilityType || 'Security vulnerability'}\\n\\n`;\n      md += `- **Severity:** ${f.severity || 'Unknown'}\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n\\n`;\n      md += `**Explanation**\\n\\n${f.explanation || 'No explanation provided.'}\\n\\n`;\n\n      if (f.remediation) {\n        md += `**Remediation**\\n\\n${f.remediation}\\n\\n`;\n      }\n\n      md += '---\\n\\n';\n    });\n  }\n\n  if (unconfirmed.length > 0) {\n    md += `### ℹ️ Unconfirmed findings (${unconfirmed.length})\\n\\n`;\n    md += 'These findings were reviewed but the supplied changes did not provide enough evidence to confirm an exploitable vulnerability.\\n\\n';\n\n    unconfirmed.forEach((f, i) => {\n      md += `**${i + 1}. ${f.vulnerabilityType || 'Security concern'}** — \\`${f.severity || 'Low'}\\`\\n\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n`;\n      md += `- **Analysis:** ${f.explanation || 'No explanation provided.'}\\n\\n`;\n    });\n  }\n\n  return md;\n})()\n}}"
             }
           ]
         },
@@ -137,10 +88,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1088,
-        -96
+        1504,
+        576
       ],
-      "id": "6ca9851e-119e-4280-9958-c94e84f4f8c5",
+      "id": "760b6390-d708-4696-b942-e48eb8a914cb",
       "name": "comment the analysis result ",
       "credentials": {
         "gitlabApi": {
@@ -151,15 +102,15 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\nconst findings = [];\n\nfor (const item of items) {\n  const rawOutput = item.json.output;\n\n  // Ignore empty agent responses\n  if (!rawOutput || typeof rawOutput !== 'string') {\n    continue;\n  }\n\n  let result;\n\n  try {\n    result = JSON.parse(rawOutput);\n  } catch {\n    // Ignore malformed agent responses for now\n    continue;\n  }\n\n  // Ignore empty/malformed results\n  if (!result || !result.file || !Array.isArray(result.findings)) {\n    continue;\n  }\n\n  for (const finding of result.findings) {\n    findings.push({\n      file: result.file,\n      line: finding.line ?? null,\n      code: finding.code ?? null,\n      reason: finding.description ?? null\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      suspicious: findings.length > 0,\n      findings,\n      findingCount: findings.length,\n      affectedFiles: [...new Set(findings.map(f => f.file))]\n    }\n  }\n];"
+        "jsCode": "const items = $input.all();\n\nconst findings = [];\n\nfor (const item of items) {\n  const rawOutput = item.json.output;\n\n  // Ignore empty agent responses\n  if (!rawOutput || typeof rawOutput !== 'string') {\n    continue;\n  }\n\n  let result;\n\n  try {\n    result = JSON.parse(rawOutput);\n  } catch {\n    // Ignore malformed agent responses for now\n    continue;\n  }\n\n  // Ignore empty/malformed results\n  if (!result || !result.file || !Array.isArray(result.findings)) {\n    continue;\n  }\n\n  for (const finding of result.findings) {\n    findings.push({\n      file: result.file,\n      oldFile: item.json.oldFile ?? null,\n      newFile: item.json.newFile ?? null,\n      deletedFile: item.json.deletedFile ?? false,\n      newFileAdded: item.json.newFileAdded ?? false,\n      renamedFile: item.json.renamedFile ?? false,\n      line: finding.line ?? null,\n      code: finding.code ?? null,\n      reason: finding.description ?? null,\n      diff: item.json.diff ?? null\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      suspicious: findings.length > 0,\n      findings,\n      findingCount: findings.length,\n      affectedFiles: [...new Set(findings.map(f => f.file))]\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        64,
-        -96
+        384,
+        576
       ],
-      "id": "166181ee-1ff1-4ef4-ad6b-ab77cea13de2",
+      "id": "262938f1-a2ce-4cfd-bf6b-41766abf80c1",
       "name": "aggregate suspicious changes"
     },
     {
@@ -190,10 +141,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        288,
-        -96
+        608,
+        576
       ],
-      "id": "3c503765-e901-44e8-b7cf-647fa26f77b8",
+      "id": "6a3a9887-883e-4dbe-a178-4aca73d5ee4c",
       "name": "is there any suspicious changes?"
     },
     {
@@ -203,44 +154,48 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        48
+        1056,
+        672
       ],
-      "id": "79838663-177e-497e-b13b-e49c6d2f6e11",
+      "id": "c291255f-7391-4fc3-94ca-82f7ee99578d",
       "name": "no suspicious changes detected"
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=You are a security vulnerability detection agent reviewing code changes from a GitLab Merge Request.\n\nYour job is to identify security-relevant changes that deserve deeper security analysis.\n\nYou are a DETECTION agent, not the final security analyst.\n\nDo NOT produce the final vulnerability verdict. A later security analysis agent will determine exploitability, severity, CWE, OWASP classification, CVE applicability, remediation, and whether the finding is a false positive.\n\nAnalyze the actual changed code and its surrounding context. Do NOT rely on simple keyword matching.\n\nFile:\n{{ $json.file }}\n\nOld file path:\n{{ $json.oldFile }}\n\nNew file path:\n{{ $json.newFile }}\n\nChange metadata:\nDeleted file: {{ $json.deletedFile }}\nNew file: {{ $json.newFileAdded }}\nRenamed file: {{ $json.renamedFile }}\n\nGit diff:\n{{ $json.diff }}\n\nYour task is to identify security-relevant code changes that should be passed to the later security analysis stage.\n\nLook for security-relevant changes including, but not limited to:\n\n* Cross-Site Scripting (XSS)\n* SQL, NoSQL, LDAP, OS and other injection\n* Command execution\n* Path traversal\n* Unsafe file handling\n* Server-Side Request Forgery (SSRF)\n* Broken access control\n* Authentication and authorization weaknesses\n* Cryptographic misuse\n* Sensitive information exposure\n* Insecure deserialization\n* Server-side template injection\n* Open redirects\n* Security misconfiguration\n* Unsafe use of external input\n* Race conditions\n* Improper exception/error handling\n* Software or data integrity problems\n* Dependency or supply-chain security issues\n* Other security weaknesses represented by relevant CWE categories\n\nIMPORTANT ANALYSIS PRINCIPLES:\n\n1. Analyze the meaning of the changed code, not merely the presence of security-sensitive keywords.\n\n2. Examine the actual added or modified executable code and its immediate context.\n\n3. Security-sensitive operations should generally be reported as candidates when their security implications require deeper analysis.\n\nFor example:\n\n```\nconst userInput = getUserInput();\nelement.innerHTML = userInput;\n```\n\nmust be reported as a security candidate because untrusted data is being written to an HTML execution/rendering sink.\n\nLikewise, an operation such as:\n\n```\nelement.innerHTML = someValue;\n```\n\nmay be reported as a candidate even if the supplied value is currently hardcoded. The later analysis stage will determine whether the value is actually attacker-controlled and exploitable.\n\n4. Consider data flow where it is visible from the supplied code.\n\nFor example, distinguish between:\n\n```\nconst input = request.body.name;\nelement.innerHTML = input;\n```\n\nand:\n\n```\nconst input = \"hello\";\nelement.innerHTML = input;\n```\n\nBoth may deserve analysis, but the description should accurately reflect the evidence available in the diff.\n\n5. Do NOT report a vulnerability merely because a security-sensitive word, API, function name, or identifier appears.\n\nUnderstand how it is being used.\n\n6. Do NOT flag commented-out code as executable security-sensitive code.\n\nFor example, this should NOT produce a finding:\n\n```\n// element.innerHTML = userInput;\n```\n\n7. Do NOT flag documentation, README text, explanatory comments, string literals, examples, test descriptions, or educational content merely because they contain names of dangerous APIs or vulnerabilities.\n\n8. Security-scanning logic is not automatically a vulnerability.\n\nFor example, code such as:\n\n```\n/innerHTML/i\n```\n\ninside a security scanner should not be reported merely because it contains the name of a dangerous API.\n\n9. Do not confuse code that DETECTS a vulnerability with code that INTRODUCES a vulnerability.\n\n10. Test fixtures and intentionally vulnerable test code may still be reported if the changed executable code actually demonstrates a security weakness. Do not automatically ignore executable test code merely because it is inside a test.\n\n11. Do not invent attack scenarios that are unsupported by the supplied code.\n\n12. Do not invent CVE identifiers.\n\n13. Do not invent CWE identifiers.\n\n14. Do not assign OWASP categories. The later analysis stage will perform CWE/CVE/OWASP classification.\n\n15. Identify the exact changed line whenever possible. Prefer the actual added line from the diff rather than a general description of the file.\n\n16. If multiple independent security-relevant changes exist in the same file, report each as a separate finding.\n\n17. If the diff contains no security-relevant candidates, return an empty findings array.\n\n18. Base your decision primarily on the changed code. Do not assume vulnerabilities elsewhere in the repository unless the supplied diff provides evidence that the change affects them.\n\nOUTPUT REQUIREMENTS:\n\nReturn ONLY valid JSON.\n\nDo NOT wrap the JSON in Markdown code fences.\n\nDo NOT include explanatory text before or after the JSON.\n\nThe JSON must have exactly this structure:\n\n{\n\"file\": \"<file>\",\n\"findings\": []\n}\n\nIf security-relevant candidates exist:\n\n{\n\"file\": \"<file>\",\n\"findings\": [\n{\n\"line\": \"<exact changed line or null>\",\n\"code\": \"<relevant changed code>\",\n\"description\": \"<why this code change deserves deeper security analysis>\",\n\"confidence\": \"high|medium|low\"\n}\n]\n}\n\nThe \"line\" field should contain the actual changed line whenever possible.\n\nThe \"code\" field should contain the smallest relevant code fragment necessary for the later analysis agent to understand the candidate.\n\nThe \"description\" field must explain why the code deserves further security analysis, without claiming that the vulnerability is definitely exploitable.\n\nThe \"confidence\" field represents your confidence that the change is security-relevant and should be investigated.\n\nReturn valid JSON only.\n",
-        "options": {}
+        "jsCode": "return $input.all().map(item => {\n  const content = item.json.choices?.[0]?.message?.content;\n\n  if (!content || typeof content !== 'string') {\n    return {\n      json: {\n        ...item.json,\n        output: ''\n      }\n    };\n  }\n\n  return {\n    json: {\n      ...item.json,\n      output: content\n    }\n  };\n});"
       },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        128,
-        -528
+        160,
+        576
       ],
-      "id": "d72e602e-3263-45e0-bd42-1369b4d36ba8",
-      "name": "AI Agent"
+      "id": "89e70725-a8a4-48aa-92bc-e852c3f84019",
+      "name": "detector's adapter"
     },
     {
       "parameters": {
-        "model": "gemma4:latest",
+        "method": "POST",
+        "url": "https://api.gapgpt.app/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    model: \"gpt-5.6-terra\",\n    messages: [\n      {\n        role: \"user\",\n        content: `You are a security vulnerability detection agent reviewing code changes from a GitLab Merge Request.\n\nYour job is to identify security-relevant changes that deserve deeper security analysis.\n\nYou are a DETECTION agent, not the final security analyst.\n\nDo NOT produce the final vulnerability verdict. A later security analysis agent will determine exploitability, severity, CWE, OWASP classification, CVE applicability, remediation, and whether the finding is a false positive.\n\nAnalyze the actual changed code and its surrounding context. Do NOT rely on simple keyword matching.\n\nFile:\n${$json.file}\n\nOld file path:\n${$json.oldFile}\n\nNew file path:\n${$json.newFile}\n\nChange metadata:\nDeleted file: ${$json.deletedFile}\nNew file: ${$json.newFileAdded}\nRenamed file: ${$json.renamedFile}\n\nGit diff:\n${$json.diff}\n\nYour task is to identify security-relevant code changes that should be passed to the later security analysis stage.\n\nLook for security-relevant changes including, but not limited to:\n\n* Cross-Site Scripting (XSS)\n* SQL, NoSQL, LDAP, OS and other injection\n* Command execution\n* Path traversal\n* Unsafe file handling\n* Server-Side Request Forgery (SSRF)\n* Broken access control\n* Authentication and authorization weaknesses\n* Cryptographic misuse\n* Sensitive information exposure\n* Insecure deserialization\n* Server-side template injection\n* Open redirects\n* Security misconfiguration\n* Unsafe use of external input\n* Race conditions\n* Improper exception/error handling\n* Software or data integrity problems\n* Dependency or supply-chain security issues\n* Other security weaknesses represented by relevant CWE categories\n\nIMPORTANT ANALYSIS PRINCIPLES:\n\n1. Analyze the meaning of the changed code, not merely the presence of security-sensitive keywords.\n\n2. Examine the actual added or modified executable code and its immediate context.\n\n3. Security-sensitive operations should generally be reported as candidates when their security implications require deeper analysis.\n\nFor example:\n\nconst userInput = getUserInput();\nelement.innerHTML = userInput;\n\nmust be reported as a security candidate because untrusted data is being written to an HTML execution/rendering sink.\n\nLikewise:\n\nelement.innerHTML = someValue;\n\nmay be reported as a candidate even if the supplied value is currently hardcoded. The later analysis stage will determine whether the value is actually attacker-controlled and exploitable.\n\n4. Consider data flow where it is visible from the supplied code.\n\nFor example, distinguish between:\n\nconst input = request.body.name;\nelement.innerHTML = input;\n\nand:\n\nconst input = \"hello\";\nelement.innerHTML = input;\n\nBoth may deserve analysis, but the description should accurately reflect the evidence available in the diff.\n\n5. Do NOT report a vulnerability merely because a security-sensitive word, API, function name, or identifier appears.\n\nUnderstand how it is being used.\n\n6. Do NOT flag commented-out code as executable security-sensitive code.\n\nFor example, this should NOT produce a finding:\n\n// element.innerHTML = userInput;\n\n7. Do NOT flag documentation, README text, explanatory comments, string literals, examples, test descriptions, or educational content merely because they contain names of dangerous APIs or vulnerabilities.\n\n8. Security-scanning logic is not automatically a vulnerability.\n\nFor example, code such as:\n\n/innerHTML/i\n\ninside a security scanner should not be reported merely because it contains the name of a dangerous API.\n\n9. Do not confuse code that DETECTS a vulnerability with code that INTRODUCES a vulnerability.\n\n10. Test fixtures and intentionally vulnerable test code may still be reported if the changed executable code actually demonstrates a security weakness. Do not automatically ignore executable test code merely because it is inside a test.\n\n11. Do not invent attack scenarios that are unsupported by the supplied code.\n\n12. Do not invent CVE identifiers.\n\n13. Do not invent CWE identifiers.\n\n14. Do not assign OWASP categories. The later analysis stage will perform CWE/CVE/OWASP classification.\n\n15. Identify the exact changed line whenever possible. Prefer the actual added line from the diff rather than a general description of the file.\n\n16. If multiple independent security-relevant changes exist in the same file, report each as a separate finding.\n\n17. If the diff contains no security-relevant candidates, return an empty findings array.\n\n18. Base your decision primarily on the changed code. Do not assume vulnerabilities elsewhere in the repository unless the supplied diff provides evidence that the change affects them.\n\nOUTPUT REQUIREMENTS — VERY IMPORTANT:\n\nYour entire response MUST be exactly ONE JSON object.\n\nReturn ONLY valid JSON.\n\nDo NOT return Markdown.\n\nDo NOT use code fences.\n\nDo NOT include explanatory text.\n\nDo NOT include a \"response\", \"output\", \"result\", \"analysis\", or any other wrapper object.\n\nThe top-level JSON object MUST contain exactly these two properties:\n\n{\n  \"file\": \"<file>\",\n  \"findings\": []\n}\n\nThe \"file\" property MUST contain the value of the File field supplied above.\n\nThe \"findings\" property MUST ALWAYS be an array.\n\nIf there are no security-relevant candidates, return:\n\n{\n  \"file\": \"<file>\",\n  \"findings\": []\n}\n\nIf security-relevant candidates exist, return:\n\n{\n  \"file\": \"<file>\",\n  \"findings\": [\n    {\n      \"line\": \"<exact changed line or null>\",\n      \"code\": \"<relevant changed code>\",\n      \"description\": \"<why this code change deserves deeper security analysis>\",\n      \"confidence\": \"high\"\n    }\n  ]\n}\n\nEvery finding MUST contain exactly these four properties:\n\n\"line\"\n\"code\"\n\"description\"\n\"confidence\"\n\nThe \"line\" field should contain the actual changed line whenever possible. Use null only when an exact changed line cannot be determined.\n\nThe \"code\" field should contain the smallest relevant code fragment necessary for the later analysis agent to understand the candidate.\n\nThe \"description\" field must explain why the code deserves further security analysis, without claiming that the vulnerability is definitely exploitable.\n\nThe \"confidence\" field MUST be exactly one of:\n\n\"high\"\n\"medium\"\n\"low\"\n\nDo not add any additional properties to the finding objects.\n\nDo not add any additional top-level properties.\n\nThe final response must be directly parseable by JSON.parse().\n\nReturn valid JSON only.`\n      }\n    ]\n  }\n}}",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
       "position": [
-        496,
-        -608
+        -288,
+        656
       ],
-      "id": "6ca14cce-9c0e-4d11-9902-f2da831fd8f1",
-      "name": "Ollama Chat Model1",
+      "id": "2bd45e8d-46db-421f-afe5-3444661b6456",
+      "name": "HTTP Request to detector agent",
       "credentials": {
-        "ollamaApi": {
-          "id": "Y4vtacrHaKeb5u0r",
-          "name": "Ollama account"
+        "httpBearerAuth": {
+          "id": "qfmlarMu3u0qbtDU",
+          "name": "Bearer Auth account"
         }
       }
     },
@@ -251,24 +206,57 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "{\n  \"model\": \"gpt-5.6-terra\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a security vulnerability detection agent reviewing code changes from a GitLab Merge Request.\\n\\nYour job is to identify security-relevant changes that deserve deeper security analysis.\\n\\nYou are a DETECTION agent, not the final security analyst.\\n\\nDo NOT produce the final vulnerability verdict. A later security analysis agent will determine exploitability, severity, CWE, OWASP classification, CVE applicability, remediation, and whether the finding is a false positive.\\n\\nAnalyze the actual changed code and its surrounding context. Do NOT rely on simple keyword matching.\\n\\nFile:\\n{{ $json.file }}\\n\\nOld file path:\\n{{ $json.oldFile }}\\n\\nNew file path:\\n{{ $json.newFile }}\\n\\nChange metadata:\\nDeleted file: {{ $json.deletedFile }}\\nNew file: {{ $json.newFileAdded }}\\nRenamed file: {{ $json.renamedFile }}\\n\\nGit diff:\\n{{ $json.diff }}\\n\\nYour task is to identify security-relevant code changes that should be passed to the later security analysis stage.\\n\\nLook for security-relevant changes including, but not limited to:\\n\\n* Cross-Site Scripting (XSS)\\n* SQL, NoSQL, LDAP, OS and other injection\\n* Command execution\\n* Path traversal\\n* Unsafe file handling\\n* Server-Side Request Forgery (SSRF)\\n* Broken access control\\n* Authentication and authorization weaknesses\\n* Cryptographic misuse\\n* Sensitive information exposure\\n* Insecure deserialization\\n* Server-side template injection\\n* Open redirects\\n* Security misconfiguration\\n* Unsafe use of external input\\n* Race conditions\\n* Improper exception/error handling\\n* Software or data integrity problems\\n* Dependency or supply-chain security issues\\n* Other security weaknesses represented by relevant CWE categories\\n\\nIMPORTANT ANALYSIS PRINCIPLES:\\n\\n1. Analyze the meaning of the changed code, not merely the presence of security-sensitive keywords.\\n\\n2. Examine the actual added or modified executable code and its immediate context.\\n\\n3. Security-sensitive operations should generally be reported as candidates when their security implications require deeper analysis.\\n\\nFor example:\\n\\n```\\nconst userInput = getUserInput();\\nelement.innerHTML = userInput;\\n```\\n\\nmust be reported as a security candidate because untrusted data is being written to an HTML execution/rendering sink.\\n\\nLikewise, an operation such as:\\n\\n```\\nelement.innerHTML = someValue;\\n```\\n\\nmay be reported as a candidate even if the supplied value is currently hardcoded. The later analysis stage will determine whether the value is actually attacker-controlled and exploitable.\\n\\n4. Consider data flow where it is visible from the supplied code.\\n\\nFor example, distinguish between:\\n\\n```\\nconst input = request.body.name;\\nelement.innerHTML = input;\\n```\\n\\nand:\\n\\n```\\nconst input = 'hello';\\nelement.innerHTML = input;\\n```\\n\\nBoth may deserve analysis, but the description should accurately reflect the evidence available in the diff.\\n\\n5. Do NOT report a vulnerability merely because a security-sensitive word, API, function name, or identifier appears.\\n\\nUnderstand how it is being used.\\n\\n6. Do NOT flag commented-out code as executable security-sensitive code.\\n\\nFor example, this should NOT produce a finding:\\n\\n```\n// element.innerHTML = userInput;\\n```\\n\\n7. Do NOT flag documentation, README text, explanatory comments, string literals, examples, test descriptions, or educational content merely because they contain names of dangerous APIs or vulnerabilities.\\n\\n8. Security-scanning logic is not automatically a vulnerability.\\n\\nFor example, code such as:\\n\\n```\\n/innerHTML/i\\n```\\n\\ninside a security scanner should not be reported merely because it contains the name of a dangerous API.\\n\\n9. Do not confuse code that DETECTS a vulnerability with code that INTRODUCES a vulnerability.\\n\\n10. Test fixtures and intentionally vulnerable test code may still be reported if the changed executable code actually demonstrates a security weakness. Do not automatically ignore executable test code merely because it is inside a test.\\n\\n11. Do not invent attack scenarios that are unsupported by the supplied code.\\n\\n12. Do not invent CVE identifiers.\\n\\n13. Do not invent CWE identifiers.\\n\\n14. Do not assign OWASP categories. The later analysis stage will perform CWE/CVE/OWASP classification.\\n\\n15. Identify the exact changed line whenever possible. Prefer the actual added line from the diff rather than a general description of the file.\\n\\n16. If multiple independent security-relevant changes exist in the same file, report each as a separate finding.\\n\\n17. If the diff contains no security-relevant candidates, return an empty findings array.\\n\\n18. Base your decision primarily on the changed code. Do not assume vulnerabilities elsewhere in the repository unless the supplied diff provides evidence that the change affects them.\\n\\nOUTPUT REQUIREMENTS:\\n\\nReturn ONLY valid JSON.\\n\\nDo NOT wrap the JSON in Markdown code fences.\\n\\nDo NOT include explanatory text before or after the JSON.\\n\\nThe JSON must have exactly this structure:\\n\\n{\\n  \\\"file\\\": \\\"<file>\\\",\\n  \\\"findings\\\": []\\n}\\n\\nIf security-relevant candidates exist:\\n\\n{\\n  \\\"file\\\": \\\"<file>\\\",\\n  \\\"findings\\\": [\\n    {\\n      \\\"line\\\": \\\"<exact changed line or null>\\\",\\n      \\\"code\\\": \\\"<relevant changed code>\\\",\\n      \\\"description\\\": \\\"<why this code change deserves deeper security analysis>\\\",\\n      \\\"confidence\\\": \\\"high|medium|low\\\"\\n    }\\n  ]\\n}\\n\\nThe 'line' field should contain the actual changed line whenever possible.\\n\\nThe 'code' field should contain the smallest relevant code fragment necessary for the later analysis agent to understand the candidate.\\n\\nThe 'description' field must explain why the code deserves further security analysis, without claiming that the vulnerability is definitely exploitable.\\n\\nThe 'confidence' field represents your confidence that the change is security-relevant and should be investigated.\\n\\nReturn valid JSON only.\\n\"\n    }\n  ]\n}",
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{\n  {\n    model: \"gpt-5.6-terra\",\n    messages: [\n      {\n        role: \"user\",\n        content: `You are a FINAL SECURITY ANALYSIS agent analyzing suspicious code changes detected in a GitLab Merge Request.\n\nThe detection stage has already identified potentially security-relevant changes.\n\nYour job is to independently analyze ALL supplied findings and determine which ones represent genuine security vulnerabilities.\n\nIMPORTANT:\nThe supplied \"diff\" is the primary evidence for your analysis.\nThe detector's \"reason\" is only a preliminary observation and must NOT be treated as proof of a vulnerability.\n\nSupplied findings:\n${JSON.stringify($json.findings, null, 2)}\n\nEach finding may contain:\n- file\n- oldFile\n- newFile\n- deletedFile\n- newFileAdded\n- renamedFile\n- line\n- code\n- reason\n- diff\n\nANALYSIS RULES:\n\n1. Analyze EVERY supplied finding.\n\n2. For each finding, inspect the actual \"diff\" and the surrounding changed code shown in that diff.\n\n3. Determine whether the changed code itself introduces, enables, weakens, or materially contributes to a genuine security vulnerability.\n\n4. Do NOT simply agree with the detector's \"reason\". The detector only identifies candidates for deeper analysis.\n\n5. The \"reason\" may contain speculation such as \"should be reviewed\", \"could become attacker-controlled\", or \"warrants deeper analysis\". Treat such statements as hypotheses, not established facts.\n\n6. Use the actual changed code as the primary source of truth.\n\n7. Consider visible data flow in the diff. If a value reaches a security-sensitive operation, determine where that value actually comes from based on the supplied code.\n\n8. Do NOT assume attacker control when the supplied code shows a hardcoded, constant, test-only, example, or otherwise non-attacker-controlled value.\n\n9. Conversely, do NOT dismiss a vulnerability merely because the changed line itself contains a harmless-looking value if the supplied diff clearly shows attacker-controlled or externally controlled data reaching the security-sensitive operation.\n\n10. Consider the surrounding changed lines, not only the exact finding line.\n\n11. Distinguish between:\n   - code that introduces a vulnerability\n   - code that merely detects or tests a vulnerability\n   - documentation or examples\n   - configuration changes\n   - operational/deployment risks\n   - security-sensitive code that is nevertheless safe in the supplied context\n\n12. Do not classify something as vulnerable merely because it contains a security-sensitive keyword, API, function, configuration option, container setting, or operation.\n\n13. Do not invent missing application behavior, attacker capabilities, permissions, authentication mechanisms, authorization controls, network topology, data flows, or deployment conditions.\n\n14. Do not invent attack scenarios, CVEs, CWEs, OWASP categories, or impacts that are not supported by the supplied evidence.\n\n15. If the supplied evidence does not establish exploitability, do not manufacture evidence to reach a vulnerability verdict.\n\n16. If a finding is only a potential security concern, hardening recommendation, maintainability issue, reproducibility issue, or operational risk without evidence of an exploitable security vulnerability, treat it as NOT a confirmed vulnerability.\n\n17. Severity must reflect the actual security impact supported by the supplied evidence. Do not inflate severity.\n\n18. Preserve the supplied \"file\" and \"line\" values EXACTLY. Never invent, normalize, rewrite, or guess locations.\n\n19. If multiple findings represent the same underlying vulnerability, they may be grouped conceptually, but every relevant file and line location must remain represented in the output.\n\n20. A finding may be considered a false positive when the supplied diff provides reasonable evidence that the suspected vulnerability is not actually present.\n\n21. If evidence is insufficient to establish a genuine vulnerability, do not claim that the code is definitely safe. Mark it as not a confirmed vulnerability and explain that the supplied evidence is insufficient to establish exploitability.\n\nFALSE POSITIVE / UNCONFIRMED FINDINGS:\n\nFor findings that are not confirmed vulnerabilities:\n- set \"isFalsePositive\" to true\n- use severity \"Low\"\n- explain specifically why the supplied diff does not establish a genuine vulnerability\n- do not falsely state that the code is completely secure\n- remediation may be null\n\nGENUINE VULNERABILITIES:\n\nFor confirmed vulnerabilities:\n- set \"isFalsePositive\" to false\n- identify the vulnerability type\n- assign the appropriate severity\n- explain the actual security impact supported by the supplied evidence\n- provide practical remediation directly relevant to the changed code\n\nSeverity must be exactly one of:\n- Critical\n- High\n- Medium\n- Low\n\nOUTPUT REQUIREMENTS:\n\nReturn ONLY valid JSON.\n\nDo not use Markdown.\nDo not use code fences.\nDo not include explanations outside the JSON.\nThe response must be directly parseable by JSON.parse().\n\nUse exactly this structure:\n\n{\n  \"findings\": [\n    {\n      \"file\": \"<file>\",\n      \"line\": \"<line>\",\n      \"vulnerabilityType\": \"<type>\",\n      \"severity\": \"High\",\n      \"isFalsePositive\": false,\n      \"explanation\": \"<explanation>\",\n      \"remediation\": \"<practical remediation>\"\n    }\n  ]\n}\n\nEvery finding object must contain exactly these seven fields:\nfile\nline\nvulnerabilityType\nseverity\nisFalsePositive\nexplanation\nremediation\n\nDo not add any other fields.\n\nFocus only on the supplied findings and the evidence contained in their diffs.`\n      }\n    ]\n  }\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        -256,
-        -96
+        832,
+        480
       ],
-      "id": "0a9095c4-b2f9-4338-85b8-860efaa662ff",
-      "name": "HTTP Request",
+      "id": "24c718a0-28da-40ee-af8c-de6e63f26958",
+      "name": "HTTP Request to analyzer agent",
       "credentials": {
         "httpBearerAuth": {
           "id": "qfmlarMu3u0qbtDU",
           "name": "Bearer Auth account"
         }
       }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -64,
+        576
+      ],
+      "id": "47be7ed3-053c-41f1-8c72-1294499c9643",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  json: {\n    output: item.json.choices?.[0]?.message?.content || ''\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        480
+      ],
+      "id": "ec5ca64c-f2d3-4314-8dc0-29850e69a441",
+      "name": "analyzer's adapter"
     }
   ],
   "pinData": {
@@ -460,72 +448,6 @@
           "item": 0
         }
       }
-    ],
-    "AI Agent": [
-      {
-        "json": {
-          "output": "{\n\"file\": \"backend/src/main/java/com/simpleblog/backend/config/CorsConfig.java\",\n\"findings\": [\n{\n\"line\": \"                .allowedOrigins(\\n                        \\\"http://localhost:4200\\\",\\n                        \\\"http://localhost:4400\\\"\\n                )\",\n\"code\": \".allowedOrigins(\\n                        \\\"http://localhost:4200\\\",\\n                        \\\"http://localhost:4400\\\"\\n                )\",\n\"description\": \"The allowed origins list for CORS mappings has been modified. Changes to CORS configurations can impact the intended security boundaries and exposure of the API. Deep analysis is required to ensure these origins are necessary and that this change does not inadvertently weaken the access control policy.\",\n\"confidence\": \"medium\"\n}\n]\n}"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": \"frontend/src/app/home/home.component.ts\",\n\"findings\": [\n{\n\"line\": \"element.innerHTML = userInput;\",\n\"code\": \"const userInput = 'test';\\nconst element = document.createElement('div');\\nelement.innerHTML = userInput;\",\n\"description\": \"The code writes a variable (`userInput`) into the DOM using `innerHTML`. This operation is vulnerable to Cross-Site Scripting (XSS) if the value of `userInput` is sourced from untrusted or user-controlled input. Although the input is currently hardcoded, the pattern represents an unsafe sink for HTML content and requires validation that the data source is always trusted.\",\n\"confidence\": \"high\"\n}\n]\n}"
-        },
-        "pairedItem": {
-          "item": 1
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": \"frontend/src/app/app.component.ts\",\n\"findings\": [\n{\n\"line\": \"element.outerHTML = userInput;\",\n\"code\": \"element.outerHTML = userInput;\",\n\"description\": \"Setting the `outerHTML` property of a DOM element using a string variable is a potential sink for Cross-Site Scripting (XSS). If `userInput` were to be derived from untrusted sources (e.g., user input or API data), an attacker could inject arbitrary HTML or script tags. This requires analysis to ensure that the input is properly sanitized or that safer DOM manipulation methods (like using `textContent`) are employed.\",\n\"confidence\": \"high\"\n}\n]\n}"
-        },
-        "pairedItem": {
-          "item": 2
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": \"frontend/Dockerfile\",\n\"findings\": [\n{\n\"line\": \"COPY nginx.conf /etc/nginx/conf.d/default.conf\",\n\"code\": \"COPY nginx.conf /etc/nginx/conf.d/default.conf\",\n\"description\": \"The Dockerfile copies an external configuration file (nginx.conf) into the Nginx server's configuration directory. Changes involving the integration of server configuration files pose a risk of security misconfiguration (e.g., improper header handling, insecure directives, or incorrect access control rules) which requires manual review of the 'nginx.conf' file contents and its implications on the deployed web service.\",\n\"confidence\": \"medium\"\n}\n]\n}"
-        },
-        "pairedItem": {
-          "item": 3
-        }
-      },
-      {
-        "json": {
-          "output": "{}"
-        },
-        "pairedItem": {
-          "item": 4
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": \"n8n/OWASP Checker – Minimal.json\",\n\"findings\": []\n}"
-        },
-        "pairedItem": {
-          "item": 5
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": null,\n\"findings\": []\n}"
-        },
-        "pairedItem": {
-          "item": 6
-        }
-      },
-      {
-        "json": {
-          "output": "{\n\"file\": \"compose.yaml\",\n\"findings\": []\n}"
-        },
-        "pairedItem": {
-          "item": 7
-        }
-      }
     ]
   },
   "connections": {
@@ -555,34 +477,12 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "HTTP Request to detector agent",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "detect suspicious changes": {
-      "main": [
-        []
-      ]
-    },
-    "Ollama Chat Model": {
-      "ai_languageModel": [
-        [
+          },
           {
-            "node": "AI Agent analyzes the suspicious code and proposes some remedies",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Agent analyzes the suspicious code and proposes some remedies": {
-      "main": [
-        [
-          {
-            "node": "responde to the trigger",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -615,7 +515,7 @@
       "main": [
         [
           {
-            "node": "AI Agent analyzes the suspicious code and proposes some remedies",
+            "node": "HTTP Request to analyzer agent",
             "type": "main",
             "index": 0
           }
@@ -640,27 +540,55 @@
         ]
       ]
     },
-    "Ollama Chat Model1": {
-      "ai_languageModel": [
+    "detector's adapter": {
+      "main": [
         [
           {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
+            "node": "aggregate suspicious changes",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "AI Agent": {
-      "main": [
-        []
-      ]
-    },
-    "HTTP Request": {
+    "HTTP Request to detector agent": {
       "main": [
         [
           {
-            "node": "aggregate suspicious changes",
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request to analyzer agent": {
+      "main": [
+        [
+          {
+            "node": "analyzer's adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "detector's adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyzer's adapter": {
+      "main": [
+        [
+          {
+            "node": "responde to the trigger",
             "type": "main",
             "index": 0
           }
@@ -673,12 +601,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "ac833694-94a3-4365-aa81-78a9460bbd80",
+  "versionId": "e0ec9d36-6f57-487d-af6c-249171e831d6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "abb8000ec0954a1873ea9f726916bd81b7e513bf70f64ea5468882434c65fb2d"
   },
   "nodeGroups": [],
-  "id": "v4J8uvFmU4fBGree",
+  "id": "BoadMjQsk45KW1gi",
   "tags": []
 }
