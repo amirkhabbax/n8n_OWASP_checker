@@ -253,7 +253,7 @@
         576
       ],
       "id": "82072177-a658-446c-93ac-5fec3339d6e1",
-      "name": "detector's adapter1"
+      "name": "detector's adapter"
     }
   ],
   "pinData": {},
@@ -351,7 +351,7 @@
       "main": [
         [
           {
-            "node": "detector's adapter1",
+            "node": "detector's adapter",
             "type": "main",
             "index": 0
           }
@@ -391,7 +391,7 @@
         ]
       ]
     },
-    "detector's adapter1": {
+    "detector's adapter": {
       "main": [
         [
           {
