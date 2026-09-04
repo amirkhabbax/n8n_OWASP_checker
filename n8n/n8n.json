@@ -1,5 +1,5 @@
 {
-  "name": "OWASP_Checker_onlyGAPgpt",
+  "name": "OWASP_Checker_final",
   "nodes": [
     {
       "parameters": {
@@ -8,10 +8,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -512,
-        576
+        -528,
+        560
       ],
-      "id": "c015255e-3050-4ddc-a7a7-760756447ea8",
+      "id": "019a361d-af04-4dee-9214-a5f9d0a99ab9",
       "name": "normalization of changes"
     },
     {
@@ -25,9 +25,9 @@
       "typeVersion": 4.5,
       "position": [
         -736,
-        576
+        560
       ],
-      "id": "1ee3f8e9-b689-4105-b58d-04b8e7830664",
+      "id": "10e81e5b-ed2d-4ea7-b370-970a51829eab",
       "name": "fetch Merge Request changes",
       "credentials": {
         "gitlabApi": {
@@ -47,11 +47,11 @@
       "typeVersion": 2.1,
       "position": [
         -960,
-        576
+        560
       ],
-      "id": "c33ad007-cd65-4be0-b2ef-eb0209395596",
+      "id": "37d6622b-ca96-42ce-8e16-fccba618e2ec",
       "name": "a Merge Request modified",
-      "webhookId": "1ed785b7-7604-4675-9618-e71698e1615d"
+      "webhookId": "dccf49b8-b2ba-4e0f-aae8-69de403a1d98"
     },
     {
       "parameters": {
@@ -62,10 +62,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1280,
+        1184,
         576
       ],
-      "id": "196eedca-3d6e-470e-aa3f-76b44727746d",
+      "id": "da0a1c90-b4cc-49d6-a570-8a0a8a2cebc1",
       "name": "responde to the trigger"
     },
     {
@@ -79,7 +79,7 @@
           "parameters": [
             {
               "name": "body",
-              "value": "={{\n(() => {\n  let result;\n\n  try {\n    result = JSON.parse($json.output || '{\"findings\":[]}');\n  } catch {\n    return '## 🔐 Security Analysis\\n\\nUnable to parse the analyzer response.';\n  }\n\n  const findings = Array.isArray(result.findings) ? result.findings : [];\n  const confirmed = findings.filter(f => f.isFalsePositive === false);\n  const unconfirmed = findings.filter(f => f.isFalsePositive === true);\n\n  let md = '## 🔐 Security Analysis\\n\\n';\n\n  if (confirmed.length === 0) {\n    md += '### ✅ No confirmed vulnerabilities\\n\\n';\n    md += 'The security analyzer did not confirm any genuine security vulnerabilities in the detected changes.\\n';\n  } else {\n    md += `### 🚨 Confirmed vulnerabilities (${confirmed.length})\\n\\n`;\n\n    confirmed.forEach((f, i) => {\n      md += `#### ${i + 1}. ${f.vulnerabilityType || 'Security vulnerability'}\\n\\n`;\n      md += `- **Severity:** ${f.severity || 'Unknown'}\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n\\n`;\n      md += `**Explanation**\\n\\n${f.explanation || 'No explanation provided.'}\\n\\n`;\n\n      if (f.remediation) {\n        md += `**Remediation**\\n\\n${f.remediation}\\n\\n`;\n      }\n\n      md += '---\\n\\n';\n    });\n  }\n\n  if (unconfirmed.length > 0) {\n    md += `### ℹ️ Unconfirmed findings (${unconfirmed.length})\\n\\n`;\n    md += 'These findings were reviewed but the supplied changes did not provide enough evidence to confirm an exploitable vulnerability.\\n\\n';\n\n    unconfirmed.forEach((f, i) => {\n      md += `**${i + 1}. ${f.vulnerabilityType || 'Security concern'}** — \\`${f.severity || 'Low'}\\`\\n\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n`;\n      md += `- **Analysis:** ${f.explanation || 'No explanation provided.'}\\n\\n`;\n    });\n  }\n\n  return md;\n})()\n}}"
+              "value": "={{\n(() => {\n  const result = $json;\n  const findings = Array.isArray(result.findings) ? result.findings : [];\n\n  const confirmed = findings.filter(f => f.confirmed === true);\n  const unconfirmed = findings.filter(f => f.confirmed !== true);\n\n  let md = '## 🔐 Security Analysis\\n\\n';\n\n  if (confirmed.length === 0) {\n    md += '### ✅ No confirmed vulnerabilities\\n\\n';\n    md += 'The security analyzer did not confirm any genuine security vulnerabilities in the detected changes.\\n';\n  } else {\n    md += `### 🚨 Confirmed vulnerabilities (${confirmed.length})\\n\\n`;\n\n    confirmed.forEach((f, i) => {\n      md += `#### ${i + 1}. ${f.title || f.vulnerability || 'Security vulnerability'}\\n\\n`;\n      md += `- **Vulnerability:** ${f.vulnerability || 'Unknown'}\\n`;\n      md += `- **Severity:** ${f.severity || 'Unknown'}\\n`;\n      md += `- **Confidence:** ${f.confidence || 'Unknown'}\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n\\n`;\n\n      md += `**Description**\\n\\n${f.description || 'No description provided.'}\\n\\n`;\n\n      if (f.evidence) {\n        md += `**Evidence**\\n\\n${f.evidence}\\n\\n`;\n      }\n\n      if (f.attackScenario) {\n        md += `**Attack Scenario**\\n\\n${f.attackScenario}\\n\\n`;\n      }\n\n      if (f.recommendation) {\n        md += `**Recommendation**\\n\\n${f.recommendation}\\n\\n`;\n      }\n\n      md += '---\\n\\n';\n    });\n  }\n\n  if (unconfirmed.length > 0) {\n    md += `### ℹ️ Unconfirmed findings (${unconfirmed.length})\\n\\n`;\n    md += 'These findings were reviewed but the supplied changes did not provide enough evidence to confirm an exploitable vulnerability.\\n\\n';\n\n    unconfirmed.forEach((f, i) => {\n      md += `#### ${i + 1}. ${f.title || f.vulnerability || 'Security concern'}\\n\\n`;\n      md += `- **Vulnerability:** ${f.vulnerability || 'Unknown'}\\n`;\n      md += `- **Severity:** ${f.severity || 'Unknown'}\\n`;\n      md += `- **Confidence:** ${f.confidence || 'Unknown'}\\n`;\n      md += `- **File:** \\`${f.file || 'Unknown'}\\`\\n`;\n      md += `- **Line:** \\`${f.line || 'Unknown'}\\`\\n\\n`;\n\n      md += `**Analysis**\\n\\n${f.description || 'No analysis provided.'}\\n\\n`;\n\n      if (f.evidence) {\n        md += `**Evidence**\\n\\n${f.evidence}\\n\\n`;\n      }\n\n      if (f.recommendation) {\n        md += `**Recommendation**\\n\\n${f.recommendation}\\n\\n`;\n      }\n\n      md += '---\\n\\n';\n    });\n  }\n\n  return md;\n})()\n}}"
             }
           ]
         },
@@ -88,10 +88,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1504,
+        1408,
         576
       ],
-      "id": "760b6390-d708-4696-b942-e48eb8a914cb",
+      "id": "a66d916c-cad2-48b1-a030-f2b168b26633",
       "name": "comment the analysis result ",
       "credentials": {
         "gitlabApi": {
@@ -99,19 +99,6 @@
           "name": "GitLab account"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\n\nconst findings = [];\n\nfor (const item of items) {\n  const rawOutput = item.json.output;\n\n  // Ignore empty agent responses\n  if (!rawOutput || typeof rawOutput !== 'string') {\n    continue;\n  }\n\n  let result;\n\n  try {\n    result = JSON.parse(rawOutput);\n  } catch {\n    // Ignore malformed agent responses for now\n    continue;\n  }\n\n  // Ignore empty/malformed results\n  if (!result || !result.file || !Array.isArray(result.findings)) {\n    continue;\n  }\n\n  for (const finding of result.findings) {\n    findings.push({\n      file: result.file,\n      oldFile: item.json.oldFile ?? null,\n      newFile: item.json.newFile ?? null,\n      deletedFile: item.json.deletedFile ?? false,\n      newFileAdded: item.json.newFileAdded ?? false,\n      renamedFile: item.json.renamedFile ?? false,\n      line: finding.line ?? null,\n      code: finding.code ?? null,\n      reason: finding.description ?? null,\n      diff: item.json.diff ?? null\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      suspicious: findings.length > 0,\n      findings,\n      findingCount: findings.length,\n      affectedFiles: [...new Set(findings.map(f => f.file))]\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        576
-      ],
-      "id": "262938f1-a2ce-4cfd-bf6b-41766abf80c1",
-      "name": "aggregate suspicious changes"
     },
     {
       "parameters": {
@@ -141,10 +128,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        608,
+        384,
         576
       ],
-      "id": "6a3a9887-883e-4dbe-a178-4aca73d5ee4c",
+      "id": "f3de5e80-cd1f-4539-9321-6cba477ac79c",
       "name": "is there any suspicious changes?"
     },
     {
@@ -154,24 +141,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1056,
-        672
+        768,
+        704
       ],
-      "id": "c291255f-7391-4fc3-94ca-82f7ee99578d",
+      "id": "34779ed4-0232-4f08-939e-59d748a45501",
       "name": "no suspicious changes detected"
-    },
-    {
-      "parameters": {
-        "jsCode": "return $input.all().map(item => {\n  const content = item.json.choices?.[0]?.message?.content;\n\n  if (!content || typeof content !== 'string') {\n    return {\n      json: {\n        ...item.json,\n        output: ''\n      }\n    };\n  }\n\n  return {\n    json: {\n      ...item.json,\n      output: content\n    }\n  };\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        576
-      ],
-      "id": "89e70725-a8a4-48aa-92bc-e852c3f84019",
-      "name": "detector's adapter"
     },
     {
       "parameters": {
@@ -187,42 +161,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        -288,
-        656
+        -304,
+        784
       ],
-      "id": "2bd45e8d-46db-421f-afe5-3444661b6456",
+      "id": "dbc72fe1-26c0-4399-8f99-f0be638e1507",
       "name": "HTTP Request to detector agent",
-      "credentials": {
-        "httpBearerAuth": {
-          "id": "qfmlarMu3u0qbtDU",
-          "name": "Bearer Auth account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.gapgpt.app/v1/chat/completions",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBearerAuth",
-        "sendBody": true,
-        "specifyBody": "=json",
-        "bodyParameters": {
-          "parameters": [
-            {}
-          ]
-        },
-        "jsonBody": "={{\n  {\n    model: \"gpt-5.6-terra\",\n    messages: [\n      {\n        role: \"user\",\n        content: `You are a FINAL SECURITY ANALYSIS agent analyzing suspicious code changes detected in a GitLab Merge Request.\n\nThe detection stage has already identified potentially security-relevant changes.\n\nYour job is to independently analyze ALL supplied findings and determine which ones represent genuine security vulnerabilities.\n\nIMPORTANT:\nThe supplied \"diff\" is the primary evidence for your analysis.\nThe detector's \"reason\" is only a preliminary observation and must NOT be treated as proof of a vulnerability.\n\nSupplied findings:\n${JSON.stringify($json.findings, null, 2)}\n\nEach finding may contain:\n- file\n- oldFile\n- newFile\n- deletedFile\n- newFileAdded\n- renamedFile\n- line\n- code\n- reason\n- diff\n\nANALYSIS RULES:\n\n1. Analyze EVERY supplied finding.\n\n2. For each finding, inspect the actual \"diff\" and the surrounding changed code shown in that diff.\n\n3. Determine whether the changed code itself introduces, enables, weakens, or materially contributes to a genuine security vulnerability.\n\n4. Do NOT simply agree with the detector's \"reason\". The detector only identifies candidates for deeper analysis.\n\n5. The \"reason\" may contain speculation such as \"should be reviewed\", \"could become attacker-controlled\", or \"warrants deeper analysis\". Treat such statements as hypotheses, not established facts.\n\n6. Use the actual changed code as the primary source of truth.\n\n7. Consider visible data flow in the diff. If a value reaches a security-sensitive operation, determine where that value actually comes from based on the supplied code.\n\n8. Do NOT assume attacker control when the supplied code shows a hardcoded, constant, test-only, example, or otherwise non-attacker-controlled value.\n\n9. Conversely, do NOT dismiss a vulnerability merely because the changed line itself contains a harmless-looking value if the supplied diff clearly shows attacker-controlled or externally controlled data reaching the security-sensitive operation.\n\n10. Consider the surrounding changed lines, not only the exact finding line.\n\n11. Distinguish between:\n   - code that introduces a vulnerability\n   - code that merely detects or tests a vulnerability\n   - documentation or examples\n   - configuration changes\n   - operational/deployment risks\n   - security-sensitive code that is nevertheless safe in the supplied context\n\n12. Do not classify something as vulnerable merely because it contains a security-sensitive keyword, API, function, configuration option, container setting, or operation.\n\n13. Do not invent missing application behavior, attacker capabilities, permissions, authentication mechanisms, authorization controls, network topology, data flows, or deployment conditions.\n\n14. Do not invent attack scenarios, CVEs, CWEs, OWASP categories, or impacts that are not supported by the supplied evidence.\n\n15. If the supplied evidence does not establish exploitability, do not manufacture evidence to reach a vulnerability verdict.\n\n16. If a finding is only a potential security concern, hardening recommendation, maintainability issue, reproducibility issue, or operational risk without evidence of an exploitable security vulnerability, treat it as NOT a confirmed vulnerability.\n\n17. Severity must reflect the actual security impact supported by the supplied evidence. Do not inflate severity.\n\n18. Preserve the supplied \"file\" and \"line\" values EXACTLY. Never invent, normalize, rewrite, or guess locations.\n\n19. If multiple findings represent the same underlying vulnerability, they may be grouped conceptually, but every relevant file and line location must remain represented in the output.\n\n20. A finding may be considered a false positive when the supplied diff provides reasonable evidence that the suspected vulnerability is not actually present.\n\n21. If evidence is insufficient to establish a genuine vulnerability, do not claim that the code is definitely safe. Mark it as not a confirmed vulnerability and explain that the supplied evidence is insufficient to establish exploitability.\n\nFALSE POSITIVE / UNCONFIRMED FINDINGS:\n\nFor findings that are not confirmed vulnerabilities:\n- set \"isFalsePositive\" to true\n- use severity \"Low\"\n- explain specifically why the supplied diff does not establish a genuine vulnerability\n- do not falsely state that the code is completely secure\n- remediation may be null\n\nGENUINE VULNERABILITIES:\n\nFor confirmed vulnerabilities:\n- set \"isFalsePositive\" to false\n- identify the vulnerability type\n- assign the appropriate severity\n- explain the actual security impact supported by the supplied evidence\n- provide practical remediation directly relevant to the changed code\n\nSeverity must be exactly one of:\n- Critical\n- High\n- Medium\n- Low\n\nOUTPUT REQUIREMENTS:\n\nReturn ONLY valid JSON.\n\nDo not use Markdown.\nDo not use code fences.\nDo not include explanations outside the JSON.\nThe response must be directly parseable by JSON.parse().\n\nUse exactly this structure:\n\n{\n  \"findings\": [\n    {\n      \"file\": \"<file>\",\n      \"line\": \"<line>\",\n      \"vulnerabilityType\": \"<type>\",\n      \"severity\": \"High\",\n      \"isFalsePositive\": false,\n      \"explanation\": \"<explanation>\",\n      \"remediation\": \"<practical remediation>\"\n    }\n  ]\n}\n\nEvery finding object must contain exactly these seven fields:\nfile\nline\nvulnerabilityType\nseverity\nisFalsePositive\nexplanation\nremediation\n\nDo not add any other fields.\n\nFocus only on the supplied findings and the evidence contained in their diffs.`\n      }\n    ]\n  }\n}}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [
-        832,
-        480
-      ],
-      "id": "24c718a0-28da-40ee-af8c-de6e63f26958",
-      "name": "HTTP Request to analyzer agent",
       "credentials": {
         "httpBearerAuth": {
           "id": "qfmlarMu3u0qbtDU",
@@ -239,217 +182,81 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -64,
+        -80,
         576
       ],
-      "id": "47be7ed3-053c-41f1-8c72-1294499c9643",
+      "id": "9217218c-697a-478c-a1a7-5dfd4192324b",
       "name": "Merge"
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(item => ({\n  json: {\n    output: item.json.choices?.[0]?.message?.content || ''\n  }\n}));"
+        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.output || '';\n\n  let parsed;\n\n  try {\n    parsed = JSON.parse(raw);\n  } catch (error) {\n    parsed = {\n      findings: [],\n      summary: {\n        totalFindings: 0,\n        confirmedVulnerabilities: 0,\n        falsePositivesOrUnconfirmed: 0,\n        highestSeverity: 'Low',\n        overview: 'The AI response could not be parsed as valid JSON.'\n      },\n      parseError: true,\n      rawOutput: raw\n    };\n  }\n\n  return {\n    json: parsed\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1056,
-        480
+        960,
+        288
       ],
-      "id": "ec5ca64c-f2d3-4314-8dc0-29850e69a441",
+      "id": "4b3b91e7-9ae9-4afd-8673-7e47b0d10642",
       "name": "analyzer's adapter"
-    }
-  ],
-  "pinData": {
-    "a Merge Request modified": [
-      {
-        "json": {
-          "headers": {
-            "content-type": "application/json",
-            "user-agent": "GitLab/19.3.1",
-            "idempotency-key": "d911a49a-919b-4879-b9ff-d2713b940447",
-            "x-gitlab-event": "Merge Request Hook",
-            "x-gitlab-webhook-uuid": "3cd40a97-9127-451c-adfd-642f659deea5",
-            "x-gitlab-instance": "http://localhost:8929",
-            "webhook-timestamp": "1788435239",
-            "webhook-id": "d911a49a-919b-4879-b9ff-d2713b940447",
-            "x-gitlab-event-uuid": "be797db3-f376-4d2e-b072-680f9652b006",
-            "accept-encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "accept": "*/*",
-            "connection": "close",
-            "host": "host.docker.internal:6200",
-            "content-length": "4742"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "object_kind": "merge_request",
-            "event_type": "merge_request",
-            "user": {
-              "id": 1,
-              "name": "Administrator Local",
-              "username": "root",
-              "avatar_url": "https://www.gravatar.com/avatar/af76026769785cbf64667d1aeb5bfaa896895b0e165b46717283ed297e1c9cb5?s=80&d=identicon",
-              "email": "[REDACTED]"
-            },
-            "project": {
-              "id": 1,
-              "name": "n8n_OWASP_checker",
-              "description": null,
-              "web_url": "http://localhost:8929/fullstack/n8n_owasp_checker",
-              "avatar_url": null,
-              "git_ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-              "git_http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git",
-              "namespace": "fullstack",
-              "visibility_level": 0,
-              "path_with_namespace": "fullstack/n8n_owasp_checker",
-              "default_branch": "master",
-              "ci_config_path": null,
-              "homepage": "http://localhost:8929/fullstack/n8n_owasp_checker",
-              "url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-              "ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-              "http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git"
-            },
-            "object_attributes": {
-              "assignee_id": 1,
-              "author_id": 1,
-              "created_at": "2026-08-30T10:09:00.775Z",
-              "description": "",
-              "draft": false,
-              "head_pipeline_id": null,
-              "id": 1,
-              "iid": 1,
-              "last_edited_at": null,
-              "last_edited_by_id": null,
-              "merge_commit_sha": null,
-              "merge_error": null,
-              "merge_params": {
-                "force_remove_source_branch": "1"
-              },
-              "merge_status": "unchecked",
-              "merge_user_id": null,
-              "merge_when_pipeline_succeeds": false,
-              "milestone_id": null,
-              "source_branch": "changesToFrontPort",
-              "source_project_id": 1,
-              "squash_commit_sha": null,
-              "state_id": 1,
-              "target_branch": "master",
-              "target_project_id": 1,
-              "time_estimate": 0,
-              "title": "changes to front host port and changes to CORS settings to work eith the altered change",
-              "updated_at": "2026-09-03T11:33:59.550Z",
-              "updated_by_id": null,
-              "prepared_at": "2026-08-30T10:09:09.289Z",
-              "assignee_ids": [
-                1
-              ],
-              "blocking_discussions_resolved": true,
-              "detailed_merge_status": "unchecked",
-              "first_contribution": true,
-              "human_time_change": null,
-              "human_time_estimate": null,
-              "human_total_time_spent": null,
-              "labels": [],
-              "last_commit": {
-                "id": "c7eae1b024b67ed258540affa98a8f71be142f06",
-                "message": "revoke another test\n",
-                "title": "revoke another test",
-                "timestamp": "2026-09-03T15:03:55+03:30",
-                "url": "http://localhost:8929/fullstack/n8n_owasp_checker/-/commit/c7eae1b024b67ed258540affa98a8f71be142f06",
-                "author": {
-                  "name": "Amirhossein",
-                  "email": "amir.khabbaz@gmail.com"
-                }
-              },
-              "merged_at": null,
-              "reviewer_ids": [
-                1
-              ],
-              "source": {
-                "id": 1,
-                "name": "n8n_OWASP_checker",
-                "description": null,
-                "web_url": "http://localhost:8929/fullstack/n8n_owasp_checker",
-                "avatar_url": null,
-                "git_ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "git_http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git",
-                "namespace": "fullstack",
-                "visibility_level": 0,
-                "path_with_namespace": "fullstack/n8n_owasp_checker",
-                "default_branch": "master",
-                "ci_config_path": null,
-                "homepage": "http://localhost:8929/fullstack/n8n_owasp_checker",
-                "url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git"
-              },
-              "state": "opened",
-              "system": false,
-              "target": {
-                "id": 1,
-                "name": "n8n_OWASP_checker",
-                "description": null,
-                "web_url": "http://localhost:8929/fullstack/n8n_owasp_checker",
-                "avatar_url": null,
-                "git_ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "git_http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git",
-                "namespace": "fullstack",
-                "visibility_level": 0,
-                "path_with_namespace": "fullstack/n8n_owasp_checker",
-                "default_branch": "master",
-                "ci_config_path": null,
-                "homepage": "http://localhost:8929/fullstack/n8n_owasp_checker",
-                "url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "ssh_url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-                "http_url": "http://localhost:8929/fullstack/n8n_owasp_checker.git"
-              },
-              "target_branch_protected": true,
-              "time_change": 0,
-              "total_time_spent": 0,
-              "url": "http://localhost:8929/fullstack/n8n_owasp_checker/-/merge_requests/1",
-              "work_in_progress": false,
-              "action": "update",
-              "actioned_at": "2026-09-03T11:33:59.736Z",
-              "oldrev": "4cbadebf6811e8a9462e409c4e1168dd74f58bfb"
-            },
-            "labels": [],
-            "changes": {},
-            "repository": {
-              "name": "n8n_OWASP_checker",
-              "url": "ssh://git@localhost:22222/fullstack/n8n_owasp_checker.git",
-              "description": null,
-              "homepage": "http://localhost:8929/fullstack/n8n_owasp_checker"
-            },
-            "assignees": [
-              {
-                "id": 1,
-                "name": "Administrator Local",
-                "username": "root",
-                "avatar_url": "https://www.gravatar.com/avatar/af76026769785cbf64667d1aeb5bfaa896895b0e165b46717283ed297e1c9cb5?s=80&d=identicon",
-                "email": "[REDACTED]"
-              }
-            ],
-            "reviewers": [
-              {
-                "id": 1,
-                "name": "Administrator Local",
-                "username": "root",
-                "avatar_url": "https://www.gravatar.com/avatar/af76026769785cbf64667d1aeb5bfaa896895b0e165b46717283ed297e1c9cb5?s=80&d=identicon",
-                "email": "[REDACTED]",
-                "state": "unreviewed",
-                "re_requested": false
-              }
-            ]
-          },
-          "webhookUrl": "http://localhost:5678/webhook-test/gitlab-mr",
-          "executionMode": "test"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the FINAL SECURITY ANALYSIS AGENT in an automated GitLab Merge Request security review pipeline.\n\nThe following JSON is the output of a previous DETECTION agent. It contains the suspicious findings and their supporting code/diffs.\n\nYou MUST analyze the findings contained in this input. Do NOT expect a raw Git diff separately.\n\nDETECTION AGENT OUTPUT:\n\n{{ JSON.stringify($json) }}\n\nIMPORTANT:\n\n* The `findings` array contains the actual findings you must analyze.\n* Each finding may contain `file`, `line`, `code`, `reason`, and `diff`.\n* The `diff` field contains the relevant Git diff and MUST be examined as evidence.\n* The `code` field contains the suspicious code and MUST be examined.\n* The `reason` field is the previous agent's hypothesis. Verify it rather than blindly trusting it.\n* NEVER return zero findings simply because the input is structured JSON rather than a raw Git diff.\n* NEVER say \"No finding data or diffs were supplied\" when the supplied JSON contains a `findings` array.\n* Analyze EVERY finding independently.\n* Do not invent code or application behavior that is not present in the supplied input.\n* If evidence is insufficient to confirm a vulnerability, return the finding with `confirmed: false` and explain why.\n\nFor each finding, determine:\n\n1. What security vulnerability, if any, is present.\n2. The source of attacker-controlled or otherwise untrusted data.\n3. The security-sensitive sink.\n4. Whether the data can actually reach the sink in a dangerous form.\n5. Whether the supplied diff introduces or modifies the vulnerability.\n6. Whether authentication, authorization, validation, sanitization, parameterization, encoding, or other mitigations are visible in the supplied evidence.\n7. The realistic security impact.\n8. An appropriate severity and confidence.\n\nPay particular attention to:\n\n* SQL Injection\n* Command Injection\n* XSS\n* Path Traversal\n* SSRF\n* Broken Access Control / IDOR\n* Authentication and authorization weaknesses\n* Hardcoded credentials and secrets\n* Insecure deserialization\n* XXE\n* LDAP injection\n* Template injection\n* Unsafe file handling\n* Security misconfiguration\n* Cryptographic weaknesses\n* Other OWASP-relevant vulnerabilities\n\nIMPORTANT SQL INJECTION RULE:\n\nIf attacker-controlled input is directly concatenated into a SQL statement and that statement is executed through a database execution API, treat it as a serious SQL injection candidate.\n\nDo NOT dismiss SQL injection merely because the supplied SQL contains a syntax error or typo. A typo such as `wehre` may make the particular statement fail, but it does not eliminate the underlying unsafe construction.\n\nIMPORTANT SECRET RULE:\n\nFor hardcoded credentials, distinguish between an actual credential and an obvious placeholder/example value. If the supplied evidence cannot establish that the value is a real active secret, mark the finding as unconfirmed or lower confidence rather than inventing certainty.\n\nIMPORTANT FALSE-POSITIVE RULE:\n\nA finding must not be discarded simply because it is incomplete. If there is insufficient evidence, preserve it and mark it `confirmed: false`.\n\nOUTPUT:\n\nReturn ONLY valid JSON. No Markdown. No text outside the JSON.\n\nUse exactly this structure:\n\n{\n\"findings\": [\n{\n\"file\": \"string\",\n\"line\": \"string\",\n\"vulnerability\": \"string\",\n\"severity\": \"Critical|High|Medium|Low|Informational\",\n\"confidence\": \"High|Medium|Low\",\n\"confirmed\": true,\n\"title\": \"string\",\n\"description\": \"string\",\n\"evidence\": \"string\",\n\"attackScenario\": \"string\",\n\"recommendation\": \"string\"\n}\n],\n\"summary\": {\n\"totalFindings\": 0,\n\"confirmedVulnerabilities\": 0,\n\"falsePositivesOrUnconfirmed\": 0,\n\"highestSeverity\": \"Critical|High|Medium|Low|Informational\",\n\"overview\": \"string\"\n}\n}\n\nCOUNTING:\n\n* `totalFindings` must equal the number of analyzed findings.\n* `confirmedVulnerabilities` must equal the number of findings where `confirmed` is true.\n* `falsePositivesOrUnconfirmed` must equal the number where `confirmed` is false.\n* `highestSeverity` must reflect the highest severity among the findings.\n* If the input contains findings, do NOT return an empty `findings` array unless there is a genuine processing failure.\n\nYour primary responsibility is to validate and analyze the DETECTION agent's findings using the supplied `code`, `reason`, and especially `diff` fields.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        608,
+        288
+      ],
+      "id": "405c4a68-ebaa-42b5-a227-e1d1d2d3e8bc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.6-terra",
+          "mode": "list",
+          "cachedResultName": "gpt-5.6-terra"
         },
-        "pairedItem": {
-          "item": 0
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        496
+      ],
+      "id": "0ec90150-60e8-4b72-adac-38355e5e3d66",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Sq8n54PQIatBX20j",
+          "name": "OpenAI account"
         }
       }
-    ]
-  },
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst findings = [];\n\nfor (const item of items) {\n  // This replaces the detector adapter's job\n  const content = item.json.choices?.[0]?.message?.content;\n\n  // Same behavior as the original adapter for empty responses\n  if (!content || typeof content !== 'string') {\n    continue;\n  }\n\n  // This replaces the aggregator's rawOutput = item.json.output\n  const rawOutput = content;\n\n  let result;\n\n  try {\n    result = JSON.parse(rawOutput);\n  } catch {\n    // Ignore malformed agent responses for now\n    continue;\n  }\n\n  // Ignore empty/malformed results\n  if (!result || !result.file || !Array.isArray(result.findings)) {\n    continue;\n  }\n\n  for (const finding of result.findings) {\n    findings.push({\n      file: result.file,\n      oldFile: item.json.oldFile ?? null,\n      newFile: item.json.newFile ?? null,\n      deletedFile: item.json.deletedFile ?? false,\n      newFileAdded: item.json.newFileAdded ?? false,\n      renamedFile: item.json.renamedFile ?? false,\n      line: finding.line ?? null,\n      code: finding.code ?? null,\n      reason: finding.description ?? null,\n      diff: item.json.diff ?? null\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      suspicious: findings.length > 0,\n      findings,\n      findingCount: findings.length,\n      affectedFiles: [...new Set(findings.map(f => f.file))]\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        576
+      ],
+      "id": "82072177-a658-446c-93ac-5fec3339d6e1",
+      "name": "detector's adapter1"
+    }
+  ],
+  "pinData": {},
   "connections": {
     "fetch Merge Request changes": {
       "main": [
@@ -500,22 +307,11 @@
         ]
       ]
     },
-    "aggregate suspicious changes": {
-      "main": [
-        [
-          {
-            "node": "is there any suspicious changes?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "is there any suspicious changes?": {
       "main": [
         [
           {
-            "node": "HTTP Request to analyzer agent",
+            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
@@ -540,17 +336,6 @@
         ]
       ]
     },
-    "detector's adapter": {
-      "main": [
-        [
-          {
-            "node": "aggregate suspicious changes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "HTTP Request to detector agent": {
       "main": [
         [
@@ -562,22 +347,11 @@
         ]
       ]
     },
-    "HTTP Request to analyzer agent": {
-      "main": [
-        [
-          {
-            "node": "analyzer's adapter",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Merge": {
       "main": [
         [
           {
-            "node": "detector's adapter",
+            "node": "detector's adapter1",
             "type": "main",
             "index": 0
           }
@@ -594,6 +368,39 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "analyzer's adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "detector's adapter1": {
+      "main": [
+        [
+          {
+            "node": "is there any suspicious changes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -601,12 +408,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "fa418371-aaa7-4e6b-97b9-7ec061449a71",
+  "versionId": "45f54581-77ca-4adb-91fa-5b767d0c7c4e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "abb8000ec0954a1873ea9f726916bd81b7e513bf70f64ea5468882434c65fb2d"
   },
   "nodeGroups": [],
-  "id": "BoadMjQsk45KW1gi",
+  "id": "iLBa1uZ4xLo1tivu",
   "tags": []
 }
