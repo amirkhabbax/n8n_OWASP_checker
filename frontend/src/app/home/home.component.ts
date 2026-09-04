@@ -19,8 +19,8 @@ export class HomeComponent implements OnInit {
     });
 
     // INTENTIONALLY VULNERABLE — for security detector testing only.
-    const userInput = 'test';
-    const element = document.createElement('div');
-    element.innerHTML = userInput;
+    const userInput = 'some malicious code';
+    const element2 = document.createElement('div');
+    element2.innerHTML = userInput;
   }
 }
